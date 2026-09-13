@@ -1,6 +1,14 @@
 # AI Support Chatbot & Agent Dashboard
 
-A portfolio-ready customer-support application built with **Python, Flask and SQLite**. It includes a public chat widget, persistent conversation history, agent authentication, an operations dashboard, human-handoff statuses and an AI provider abstraction that can run in demo mode or connect to **OpenAI** / **Anthropic Claude**.
+A portfolio-ready customer-support application built with **Python, Flask and SQLite**.
+
+## 🚀 Live Demo
+
+👉 [Open AI Support Chatbot](https://ai-support-chatbot-lsvm.onrender.com)
+
+**Demo agent login**
+- Email: `admin@demo.local`
+- Password: `demo1234`
 
 ## Why this project
 
