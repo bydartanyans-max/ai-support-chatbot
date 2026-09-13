@@ -128,12 +128,3 @@ For a real deployment I would add PostgreSQL, CSRF protection, rate limiting, ro
 
 This project is intentionally structured so an interviewer can run it without an external AI account, while the integration layer shows how a production LLM provider can be connected through environment variables.
 
-## 🚀 Live Demo
-
-Try the application here:
-
-👉 [Open AI Support Chatbot](https://ai-support-chatbot-lsvm.onrender.com)
-
-**Demo agent login**
-- Email: `admin@demo.local`
-- Password: `demo1234`
