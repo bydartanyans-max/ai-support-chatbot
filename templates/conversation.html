@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Conversation #{{ conversation.id }}{% endblock %}
+{% block content %}
+<section class="dashboard-shell narrow">
+  <div class="page-head"><div><a class="back" href="{{ url_for('dashboard') }}">← Dashboard</a><h1>Conversation #{{ conversation.id }}</h1><p class="subtle">{{ conversation.visitor_name }}</p></div><form method="post" action="{{ url_for('set_status', conversation_id=conversation.id) }}"><select name="status" onchange="this.form.submit()"><option value="open" {% if conversation.status=='open' %}selected{% endif %}>Open</option><option value="needs_human" {% if conversation.status=='needs_human' %}selected{% endif %}>Needs human</option><option value="closed" {% if conversation.status=='closed' %}selected{% endif %}>Closed</option></select></form></div>
+  <div class="panel transcript">
+    {% for m in messages %}<div class="transcript-row {{ m.sender }}"><div><span>{{ 'Visitor' if m.sender=='user' else 'AI Assistant' }}</span><small>{{ m.created_at[:19].replace('T',' ') }}</small></div><p>{{ m.content }}</p></div>{% else %}<p class="empty">No messages.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

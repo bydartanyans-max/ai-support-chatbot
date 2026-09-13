@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}AI Support Chatbot Demo{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">PORTFOLIO DEMO</span>
+    <h1>AI customer support, with human handoff.</h1>
+    <p>Flask + SQLite + provider abstraction for OpenAI / Claude + agent dashboard.</p>
+    <div class="badges"><span>REST API</span><span>SQLite</span><span>Auth</span><span>AI Provider</span></div>
+  </div>
+  <div class="chat-card">
+    <div class="chat-head"><div><strong>Support Assistant</strong><small id="status">online · demo mode</small></div><span class="dot"></span></div>
+    <div id="messages" class="messages">
+      <div class="bubble bot">Salut! Cu ce te pot ajuta astăzi?</div>
+    </div>
+    <form id="chat-form" class="chat-form">
+      <input id="message" autocomplete="off" placeholder="Scrie un mesaj..." required>
+      <button type="submit">Trimite</button>
+    </form>
+  </div>
+</section>
+<script>
+let conversationId = null;
+const messages = document.getElementById('messages');
+const form = document.getElementById('chat-form');
+const input = document.getElementById('message');
+
+function addBubble(text, kind) {
+  const el = document.createElement('div');
+  el.className = `bubble ${kind}`;
+  el.textContent = text;
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function ensureConversation() {
+  if (conversationId) return conversationId;
+  const res = await fetch('/api/conversations', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({visitor_name: 'Website Visitor'})
+  });
+  const data = await res.json();
+  conversationId = data.conversation_id;
+  return conversationId;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  addBubble(text, 'user');
+  input.value = '';
+  const cid = await ensureConversation();
+  const typing = document.createElement('div');
+  typing.className = 'bubble bot muted';
+  typing.textContent = 'Scrie...';
+  messages.appendChild(typing);
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({conversation_id: cid, message: text})
+    });
+    const data = await res.json();
+    typing.remove();
+    addBubble(data.reply || data.error || 'Eroare', 'bot');
+    document.getElementById('status').textContent = `online · ${data.provider || 'demo'}`;
+  } catch (_) {
+    typing.remove();
+    addBubble('Nu am putut contacta serverul.', 'bot');
+  }
+});
+</script>
+{% endblock %}

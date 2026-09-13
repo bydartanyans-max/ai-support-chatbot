@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Support Dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <div class="page-head"><div><span class="eyebrow">OPERATIONS</span><h1>Conversation dashboard</h1></div><div class="user-chip">{{ session.get('user_email') }}</div></div>
+  <div class="stats">
+    <div class="stat"><span>Conversations</span><strong>{{ conversations|length }}</strong></div>
+    <div class="stat"><span>Open</span><strong>{{ open_conversations }}</strong></div>
+    <div class="stat"><span>Messages</span><strong>{{ total_messages }}</strong></div>
+  </div>
+  <div class="panel table-panel">
+    <table>
+      <thead><tr><th>ID</th><th>Visitor</th><th>Status</th><th>Messages</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+      {% for c in conversations %}
+        <tr><td>#{{ c.id }}</td><td>{{ c.visitor_name }}</td><td><span class="status {{ c.status }}">{{ c.status }}</span></td><td>{{ c.message_count }}</td><td>{{ c.updated_at[:19].replace('T',' ') }}</td><td><a href="{{ url_for('dashboard_conversation', conversation_id=c.id) }}">Open →</a></td></tr>
+      {% else %}<tr><td colspan="6" class="empty">No conversations yet. Open the public chat and send a message.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

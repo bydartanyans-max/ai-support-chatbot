@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Support Desk{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="topbar">
+    <a class="brand" href="{{ url_for('home') }}">AI Support Desk</a>
+    <div class="nav-actions">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <form method="post" action="{{ url_for('logout') }}"><button class="link-btn">Logout</button></form>
+      {% else %}
+        <a href="{{ url_for('login') }}">Agent login</a>
+      {% endif %}
+    </div>
+  </nav>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

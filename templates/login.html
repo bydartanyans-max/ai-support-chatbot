@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Agent Login{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <form class="panel auth-card" method="post">
+    <span class="eyebrow">AGENT AREA</span>
+    <h1>Login</h1>
+    <p class="subtle">Demo: admin@demo.local / demo1234</p>
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% for category, msg in msgs %}<div class="flash">{{ msg }}</div>{% endfor %}{% endwith %}
+    <label>Email</label><input name="email" type="email" value="admin@demo.local" required>
+    <label>Password</label><input name="password" type="password" value="demo1234" required>
+    <button class="primary" type="submit">Intră în dashboard</button>
+  </form>
+</section>
+{% endblock %}
