@@ -13,6 +13,7 @@ def client(monkeypatch):
 
     monkeypatch.setattr(chatbot, "DB_PATH", db_path)
     monkeypatch.setenv("AI_PROVIDER", "mock")
+    monkeypatch.delenv("WEBHOOK_SECRET", raising=False)
     chatbot.app.config.update(TESTING=True, SECRET_KEY="test-secret")
     chatbot.init_db()
 
@@ -34,6 +35,7 @@ def test_create_conversation(client):
     data = response.get_json()
     assert data["conversation_id"] > 0
     assert data["visitor_name"] == "Demo Client"
+    assert data["source"] == "web"
 
 
 def test_chat_mock_provider(client):
@@ -57,3 +59,37 @@ def test_chat_requires_message(client):
 def test_unknown_conversation(client):
     response = client.get("/api/conversations/999999/messages")
     assert response.status_code == 404
+
+
+def test_incoming_webhook_creates_conversation(client):
+    response = client.post(
+        "/api/webhooks/incoming",
+        json={
+            "visitor_name": "Webhook Client",
+            "source": "make.com",
+            "message": "Care este programul?",
+        },
+    )
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["provider"] == "mock"
+    assert data["source"] == "make.com"
+    assert data["conversation_id"] > 0
+
+
+def test_incoming_webhook_secret(client, monkeypatch):
+    monkeypatch.setenv("WEBHOOK_SECRET", "expected-secret")
+
+    unauthorized = client.post(
+        "/api/webhooks/incoming",
+        json={"message": "hello"},
+        headers={"X-Webhook-Secret": "wrong-secret"},
+    )
+    assert unauthorized.status_code == 401
+
+    authorized = client.post(
+        "/api/webhooks/incoming",
+        json={"message": "Care este programul?"},
+        headers={"X-Webhook-Secret": "expected-secret"},
+    )
+    assert authorized.status_code == 200
