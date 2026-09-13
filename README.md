@@ -1,10 +1,10 @@
-# AI Support Chatbot & Agent Dashboard
+# AI Support Chatbot & Agent Dashboard 🤖
 
-A portfolio-ready customer-support application built with **Python, Flask and SQLite**.
+A portfolio-ready customer-support application built with **Python, Flask and SQLite**, with optional **OpenAI** and **Anthropic Claude** integrations, an agent dashboard, automated testing, Docker support and an incoming webhook designed for business automation workflows.
 
 ## 🚀 Live Demo
 
-👉 [Open AI Support Chatbot](https://ai-support-chatbot-lsvm.onrender.com)
+👉 https://ai-support-chatbot-lsvm.onrender.com
 
 **Demo agent login**
 - Email: `admin@demo.local`
@@ -12,7 +12,7 @@ A portfolio-ready customer-support application built with **Python, Flask and SQ
 
 ## Why this project
 
-This demo shows more than a chatbot UI: it demonstrates backend logic, REST endpoints, authentication, SQL persistence, third-party API integration patterns and a small operational dashboard.
+This demo goes beyond a chatbot UI. It demonstrates backend architecture, REST endpoints, authentication, SQL persistence, LLM-provider abstraction, operational workflows and integration patterns that can connect with tools such as **Make.com, Zapier, Shopify, WooCommerce, CRM systems or Telegram**.
 
 ## Features
 
@@ -23,16 +23,91 @@ This demo shows more than a chatbot UI: it demonstrates backend logic, REST endp
 - Agent dashboard with conversation metrics
 - Conversation transcript view
 - Status workflow: `open`, `needs_human`, `closed`
+- Conversation source tracking (`web`, `webhook`, etc.)
 - AI provider abstraction:
-  - `mock` — works without any API key
-  - `openai` — optional OpenAI API
-  - `anthropic` — optional Claude API
+  - `mock` — works without an API key
+  - `openai` — optional OpenAI API integration
+  - `anthropic` — optional Claude API integration
+- Incoming business-automation webhook
+- Optional webhook-secret authentication
+- Human-handoff detection
+- Automated tests with `pytest`
+- GitHub Actions CI
+- Docker support
 - `/health` endpoint for deployment checks
-- Responsive custom CSS, no UI framework required
+- Responsive custom CSS
 
 ## Tech stack
 
-`Python` · `Flask` · `SQLite` · `HTML` · `CSS` · `JavaScript` · `REST API` · `Werkzeug Auth`
+`Python` · `Flask` · `SQLite` · `HTML` · `CSS` · `JavaScript` · `REST API` · `Anthropic Claude` · `OpenAI` · `pytest` · `GitHub Actions` · `Docker`
+
+## Architecture
+
+```text
+Customer / External System
+        │
+        ├── Web Chat
+        │      │
+        │      ▼
+        └── Webhook API ───────┐
+                               ▼
+                         Flask Backend
+                               │
+                 ┌─────────────┼─────────────┐
+                 ▼             ▼             ▼
+              SQLite      AI Provider     Agent Dashboard
+                              Layer
+                         ┌─────┼─────┐
+                         ▼     ▼     ▼
+                       Mock OpenAI Claude
+```
+
+## Main API endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/conversations` | Start a conversation |
+| `POST` | `/api/chat` | Send a user message and receive AI response |
+| `GET` | `/api/conversations/<id>/messages` | Fetch transcript |
+| `POST` | `/api/webhooks/incoming` | Receive a message from an automation/integration |
+| `GET` | `/health` | Service health check |
+
+## Automation webhook
+
+The incoming webhook allows an external automation system to send customer messages directly into the chatbot workflow.
+
+Example payload:
+
+```json
+{
+  "visitor_name": "Demo Customer",
+  "source": "woocommerce",
+  "message": "I need help with order #1024"
+}
+```
+
+Example request:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/webhooks/incoming \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: change-this-webhook-secret" \
+  -d '{"visitor_name":"Demo Customer","source":"make.com","message":"I need support"}'
+```
+
+This endpoint can be connected to flows such as:
+
+```text
+Shopify / WooCommerce / Website Form
+              ↓
+        Make.com / Zapier
+              ↓
+       Incoming Webhook
+              ↓
+         AI Assistant
+              ↓
+     Automated Reply / Human Handoff
+```
 
 ## Run locally
 
@@ -43,26 +118,19 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open: `http://127.0.0.1:5000`
+Open `http://127.0.0.1:5000`.
 
-### Demo agent account
-
-```text
-Email: admin@demo.local
-Password: demo1234
-```
-
-## Enable a real AI provider
-
-Copy the example environment configuration:
+## Docker
 
 ```bash
-cp .env.example .env
+docker build -t ai-support-chatbot .
+docker run -p 5000:5000 \
+  -e SECRET_KEY=change-me \
+  -e AI_PROVIDER=mock \
+  ai-support-chatbot
 ```
 
-Export the variables in your shell (or load them with your preferred environment manager).
-
-### Claude
+## Enable Claude
 
 ```bash
 export AI_PROVIDER=anthropic
@@ -70,7 +138,7 @@ export ANTHROPIC_API_KEY="your-key"
 python app.py
 ```
 
-### OpenAI
+## Enable OpenAI
 
 ```bash
 export AI_PROVIDER=openai
@@ -78,53 +146,28 @@ export OPENAI_API_KEY="your-key"
 python app.py
 ```
 
-If the API is unavailable, the application safely falls back to demo responses.
+If a configured AI service is unavailable, the application falls back safely to demo responses.
 
-## Main API endpoints
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| `POST` | `/api/conversations` | Start a conversation |
-| `POST` | `/api/chat` | Send a user message and receive AI response |
-| `GET` | `/api/conversations/<id>/messages` | Fetch transcript |
-| `GET` | `/health` | Service health check |
-
-## Example request
+## Tests
 
 ```bash
-curl -X POST http://127.0.0.1:5000/api/conversations \
-  -H "Content-Type: application/json" \
-  -d '{"visitor_name":"Demo Client"}'
+pip install pytest
+pytest -q
 ```
 
-Then:
+Tests cover health checks, conversation creation, chatbot responses, validation and missing conversations. GitHub Actions runs the test suite automatically on pushes and pull requests to `main`.
 
-```bash
-curl -X POST http://127.0.0.1:5000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"conversation_id":1,"message":"Care este programul?"}'
-```
+## Security notes
 
-## Architecture
-
-```text
-Browser UI
-   │
-   ├── Public Chat ──> Flask REST API ──> SQLite
-   │                         │
-   │                         └── AI Provider Layer
-   │                              ├── Mock
-   │                              ├── OpenAI
-   │                              └── Anthropic Claude
-   │
-   └── Agent Login ──> Dashboard / Conversation Review
-```
+- API keys and secrets are configured through environment variables.
+- `.env` files are excluded from Git.
+- The webhook can be protected with `WEBHOOK_SECRET` and the `X-Webhook-Secret` header.
+- Demo credentials are intentionally public and should be replaced in production.
 
 ## Production improvements
 
-For a real deployment I would add PostgreSQL, CSRF protection, rate limiting, role-based permissions, migrations, background jobs/webhooks, observability, Docker and automated tests/CI.
+For a full production deployment I would add PostgreSQL, CSRF protection, rate limiting, role-based permissions, database migrations, background jobs, structured logging, observability and more advanced provider retry/error handling.
 
-## Portfolio note
+## Portfolio focus
 
-This project is intentionally structured so an interviewer can run it without an external AI account, while the integration layer shows how a production LLM provider can be connected through environment variables.
-
+This project demonstrates practical experience with **Python backend development, REST APIs, AI integrations, chatbot workflows, webhooks, business automation, testing, CI and containerization** — the same building blocks used in real automation and AI-agent projects.
