@@ -10,6 +10,14 @@ A portfolio-ready customer-support application built with **Python, Flask and SQ
 - Email: `admin@demo.local`
 - Password: `demo1234`
 
+## Screenshots
+
+![Public support chat](screenshots/public-chat.png)
+
+![Agent dashboard](screenshots/agent-dashboard.png)
+
+![Conversation transcript](screenshots/conversation-transcript.png)
+
 ## Why this project
 
 This demo goes beyond a chatbot UI. It demonstrates backend architecture, REST endpoints, authentication, SQL persistence, LLM-provider abstraction, operational workflows and integration patterns that can connect with tools such as **Make.com, Zapier, Shopify, WooCommerce, CRM systems or Telegram**.
